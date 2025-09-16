@@ -55,7 +55,7 @@ module mem #(parameter FILENAME = "memfile.hex")
            input  logic [31:0] a, wd,
            output logic [31:0] rd);
 
-  logic  [31:0] RAM[511:0];
+  logic  [31:0] RAM [0:511];
 
   // initialize memory with instructions
   initial
@@ -157,32 +157,32 @@ module maindec(input  logic       clk, reset,
   // next state logic
   always_comb
     case(state)
-      FETCH:   nextstate <= DECODE;
+      FETCH:   nextstate = DECODE;
       DECODE:  case(op)
-                 LW:      nextstate <= MEMADR;
-                 SW:      nextstate <= MEMADR;
-                 RTYPE:   nextstate <= RTYPEEX;
-                 BEQ:     nextstate <= BEQEX;
-                 ADDI:    nextstate <= ADDIEX;
-                 JAL:     nextstate <= JEX;
-                 default: nextstate <= 4'bx; // should never happen
+                 LW:      nextstate = MEMADR;
+                 SW:      nextstate = MEMADR;
+                 RTYPE:   nextstate = RTYPEEX;
+                 BEQ:     nextstate = BEQEX;
+                 ADDI:    nextstate = ADDIEX;
+                 JAL:     nextstate = JEX;
+                 default: nextstate = 4'bx; // should never happen
                endcase
  		// Add code here
       MEMADR: case(op)
-                 LW:      nextstate <= MEMRD;
-                 SW:      nextstate <= MEMWR;
-                 default: nextstate <= 4'bx;
+                 LW:      nextstate = MEMRD;
+                 SW:      nextstate = MEMWR;
+                 default: nextstate = 4'bx;
                endcase
-      MEMRD:   nextstate <= MEMWB;
-      MEMWB:   nextstate <= FETCH;
-      MEMWR:   nextstate <= FETCH;
-      RTYPEEX: nextstate <= RTYPEWB;
-      RTYPEWB: nextstate <= FETCH;
-      BEQEX:   nextstate <= FETCH;
-      ADDIEX:  nextstate <= ADDIWB;
-      ADDIWB:  nextstate <= FETCH;
-      JEX:     nextstate <= FETCH;
-      default: nextstate <= 4'bx; // should never happen
+      MEMRD:   nextstate = MEMWB;
+      MEMWB:   nextstate = FETCH;
+      MEMWR:   nextstate = FETCH;
+      RTYPEEX: nextstate = RTYPEWB;
+      RTYPEWB: nextstate = FETCH;
+      BEQEX:   nextstate = FETCH;
+      ADDIEX:  nextstate = ADDIWB;
+      ADDIWB:  nextstate = FETCH;
+      JEX:     nextstate = FETCH;
+      default: nextstate = 4'bx; // should never happen
     endcase
 
   // output logic
@@ -192,19 +192,19 @@ module maindec(input  logic       clk, reset,
 //                                          pcsrc
   always_comb//                                alusrcb
     case(state)//                    alusrca       aluop
-      FETCH:    controls <= 16'b1010_00_000_00_001_00;
-      DECODE:   controls <= 16'b0000_00_000_00_011_00;
-      MEMADR:   controls <= 16'b0000_01_000_00_010_00;
-      MEMRD:    controls <= 16'b0000_00_010_00_000_00;
-      MEMWB:    controls <= 16'b0001_00_001_00_000_00;
-      MEMWR:    controls <= 16'b0100_00_010_00_000_00;
-      RTYPEEX:  controls <= 16'b0000_01_000_00_000_10;
-      RTYPEWB:  controls <= 16'b0001_00_000_00_000_00;
-      BEQEX:    controls <= 16'b0000_01_100_01_000_01;
-      ADDIEX:   controls <= 16'b0000_01_000_00_010_00;
-      ADDIWB:   controls <= 16'b0001_00_000_00_000_00;
-      JEX:      controls <= 16'b1000_10_000_00_100_00;      
-      default:  controls <= 16'bxxxx_xx_xxx_xx_xx_xx; // should never happen
+      FETCH:    controls = 16'b1010_00_000_00_001_00;
+      DECODE:   controls = 16'b0000_00_000_00_011_00;
+      MEMADR:   controls = 16'b0000_01_000_00_010_00;
+      MEMRD:    controls = 16'b0000_00_010_00_000_00;
+      MEMWB:    controls = 16'b0001_00_001_00_000_00;
+      MEMWR:    controls = 16'b0100_00_010_00_000_00;
+      RTYPEEX:  controls = 16'b0000_01_000_00_000_10;
+      RTYPEWB:  controls = 16'b0001_00_000_00_000_00;
+      BEQEX:    controls = 16'b0000_01_100_01_000_01;
+      ADDIEX:   controls = 16'b0000_01_000_00_010_00;
+      ADDIWB:   controls = 16'b0001_00_000_00_000_00;
+      JEX:      controls = 16'b1000_10_000_00_100_00;      
+      default:  controls = 16'bxxxx_xx_xxx_xx_xx_xx; // should never happen
     endcase
 endmodule
 
@@ -214,14 +214,14 @@ module aludec(input  logic [2:0] funct3,
 
   always_comb
     case(aluop)
-      2'b00: alucontrol <= 3'b010;  // add (fetch, memaddr, addi, etc.)
-      2'b01: alucontrol <= 3'b110;  // sub (beq)
+      2'b00: alucontrol = 3'b010;  // add (fetch, memaddr, addi, etc.)
+      2'b01: alucontrol = 3'b110;  // sub (beq)
       default: case(funct3)         // RTYPE 
-           3'b000: alucontrol <= 3'b010; // ADD
-           3'b111: alucontrol <= 3'b000; // AND
-           3'b110: alucontrol <= 3'b001; // OR
-           3'b010: alucontrol <= 3'b111; // SLT
-          default: alucontrol <= 3'bxxx; // ???
+           3'b000: alucontrol = 3'b010; // ADD
+           3'b111: alucontrol = 3'b000; // AND
+           3'b110: alucontrol = 3'b001; // OR
+           3'b010: alucontrol = 3'b111; // SLT
+          default: alucontrol = 3'bxxx; // ???
         endcase
     endcase
 
@@ -331,11 +331,11 @@ module alu(input  logic [31:0] a, b,
   assign sum = a + condinvb + alucontrol[2];
 
   always_comb
-    case (alucontrol[1:0])
-      2'b00: result = a & b;
-      2'b01: result = a | b;
-      2'b10: result = sum;
-      2'b11: result = sum[31];
+    case(alucontrol)
+      3'b000, 3'b100: result = a & b;
+      3'b001, 3'b101: result = a | b;
+      3'b010, 3'b110: result = sum;
+      3'b011, 3'b111: result = sum[31];
     endcase
 
   assign zero = (result == 32'b0);
@@ -364,10 +364,10 @@ module mux4 #(parameter WIDTH = 8)
 
    always_comb
       case(s)
-         2'b00: y <= d0;
-         2'b01: y <= d1;
-         2'b10: y <= d2;
-         2'b11: y <= d3;
+         2'b00: y = d0;
+         2'b01: y = d1;
+         2'b10: y = d2;
+         2'b11: y = d3;
       endcase
 endmodule
 
@@ -378,11 +378,11 @@ module mux5 #(parameter WIDTH = 8)
 
    always_comb
       casex(s)
-         3'b000: y <= d0;
-         3'b001: y <= d1;
-         3'b010: y <= d2;
-         3'b011: y <= d3;
-         3'b1xx: y <= d4;
+         3'b000: y = d0;
+         3'b001: y = d1;
+         3'b010: y = d2;
+         3'b011: y = d3;
+         3'b1xx: y = d4;
       endcase
 endmodule
 

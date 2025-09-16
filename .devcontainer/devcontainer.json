@@ -1,0 +1,12 @@
+{
+  "postCreateCommand": "sudo apt update && sudo apt install -y iverilog gcc-riscv64-unknown-elf qemu-user",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "wavetrace.wavetrace",
+        "mshr-h.VerilogHDL",
+        "yuyichao.digitaljs"
+      ]
+    }
+  }  
+}

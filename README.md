@@ -17,4 +17,5 @@ Multi-cycle implementation of a subset of RISC-V for educational purposes
 * [Digital Design and Computer Architecture: RISC-V Edition (future)](https://www.elsevier.com/books/digital-design-and-computer-architecture/harris/978-0-12-820064-3)
 * [emulsiV: a visual simulator for a simple RISC-V processor](https://eseo-tech.github.io/emulsiV/)
 * [RARS: RISC-V Assembler and Runtime Simulator](https://github.com/TheThirdOne/rars)
+* [From Blinker to RISC-V](https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/)
 * [DarkRISCV: Opensource RISC-V implemented from scratch in one night!](https://github.com/darklife/darkriscv)
