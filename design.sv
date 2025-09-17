@@ -59,9 +59,7 @@ module mem #(parameter FILENAME = "memfile.hex")
 
   // initialize memory with instructions
   initial
-    begin
-      $readmemh(FILENAME, RAM);
-    end
+    $readmemh(FILENAME, RAM);
 
   assign rd = RAM[a[31:2]]; // word aligned
 
