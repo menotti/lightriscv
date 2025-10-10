@@ -26,10 +26,6 @@ Uncomment the following line if you want to simulate the multicycle version. In 
 ## EDA Playground
 * [You can try it online here!](https://www.edaplayground.com/x/cTAA)
 
-## References
-[^1][Digital Design and Computer Architecture](https://shop.elsevier.com/books/digital-design-and-computer-architecture/harris/978-0-12-394424-5)
-[^2][From Blinker to RISC-V](https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/)
-
 
 ## Further Reading 
 * [Guia Prático RISC-V (pt-br)](http://riscvbook.com/portuguese/)
@@ -38,3 +34,8 @@ Uncomment the following line if you want to simulate the multicycle version. In 
 * [Digital Design and Computer Architecture: RISC-V Edition](https://www.elsevier.com/books/digital-design-and-computer-architecture/harris/978-0-12-820064-3)
 * [emulsiV: a visual simulator for a simple RISC-V processor](https://eseo-tech.github.io/emulsiV/)
 * [DarkRISCV: Opensource RISC-V implemented from scratch in one night!](https://github.com/darklife/darkriscv)
+
+## References
+
+[^1]: [Digital Design and Computer Architecture](https://shop.elsevier.com/books/digital-design-and-computer-architecture/harris/978-0-12-394424-5)
+[^2]: [From Blinker to RISC-V](https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/)
