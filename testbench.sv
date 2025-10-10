@@ -1,25 +1,37 @@
 module testbench();
+  logic clk, reset, memwrite;
+  logic [31:0] writedata, addr, readdata, pc, instr;
 
-  logic        clk;
-  logic        reset;
+  // Von Neumann architecture
+  `ifdef MULTI
+    initial $display("### Compiling for Von Neumann architecture ###");
+    riscvmulti cpu(clk, reset, addr, writedata, memwrite, readdata);
+    mem #("von_neumann.hex") mem(clk, memwrite, addr, writedata, readdata);
+  `else
+  // Harvard architecture
+    initial $display("### Compiling for Harvard architecture ###");
+    riscvmono cpu(clk, reset, pc, instr, addr, writedata, memwrite, readdata);
+    mem #("harvard_text.hex") instr_rom(.a(pc), .rd(instr));
+    mem #("harvard_data.hex") data_ram(clk, memwrite, addr, writedata, readdata);
+  `endif
 
-  logic [31:0] writedata, adr, readdata;
-  logic        memwrite;
-  
-    
-  // microprocessor (control & datapath)
-  riscvmulti riscvmulti(clk, reset, adr, writedata, memwrite, readdata);
-
-  // memory 
-  mem #("fibo.hex") mem(clk, memwrite, adr, writedata, readdata);
-  
   // initialize test
   initial
     begin
-      // $monitor("time=%0t, pc=%h, instr=%h, state=%4b, aluIn1=%h, aluIn2=%h, aluOut=%h", $time, riscvmulti.dp.pc, riscvmulti.dp.instrreg.q, riscvmulti.c.md.state, riscvmulti.dp.alu.a, riscvmulti.dp.alu.b, riscvmulti.dp.alu.result);
       $dumpfile("dump.vcd"); $dumpvars(0);
-      reset <= 1; #22 reset <= 0;
-      #42000 $finish;
+      reset <= 1; #20 reset <= 0;
+      `ifdef MULTI
+        $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.dp.pc, cpu.dp.instrreg.q, cpu.c.md.state, cpu.dp.alu.a, cpu.dp.alu.b, cpu.dp.alu.result); // multicycle
+        $writememh("registers.out", cpu.dp.rf.rf);
+        $writememh("von_neumann.out", mem.RAM);
+        #12000;
+      `else
+        $monitor("time=%4t, pc=%h, instr=%h, SrcA=%h, SrcB=%h, ALUResult=%h", $time, pc, instr, cpu.SrcA, cpu.SrcB, cpu.ALUResult); // singlecycle
+        $writememh("registers.out", cpu.RegisterFile);
+        $writememh("harvard_data.out", data_ram.RAM);
+        #3000;
+      `endif
+      $finish;
     end
 
   // generate clock to sequence tests
@@ -30,13 +42,19 @@ module testbench();
 
   // check results
   always @(negedge clk)
-    begin
-      if(memwrite) begin
-        if(adr>>2 === 32'h0000006f && writedata === 32'h6d73e55f) begin
-          $display("Simulation succeeded!");
-          //$writememh("fibo_ok.hex", mem.RAM);
-          $finish;
-        end
+    if (memwrite) begin
+      `ifdef MULTI
+        if (addr>>2 === 32'h0000006f && writedata === 32'h6d73e55f) begin
+          #10 $display("Multi-cycle simulation succeeded!");
+          $writememh("registers.out", cpu.dp.rf.rf);
+          $writememh("harvard_data.out", mem.RAM);
+      `else
+        if (addr>>2 === 32'h0000002e && writedata === 32'h6d73e55f) begin
+          #10 $display("Single-cycle simulation succeeded!");
+          $writememh("registers.out", cpu.RegisterFile);
+          $writememh("harvard_data.out", data_ram.RAM);
+      `endif
+        $finish;
       end
     end
 endmodule
