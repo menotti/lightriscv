@@ -1,5 +1,7 @@
 # LightRISCV
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/menotti/lightriscv)
+
 Single & Multi-cycle implementation of a subset of RISC-V for educational purposes. 
 
 The first version of this processor (multicycle) was adapted from the MIPS processor described in the Harris & Harris book[^1]. The single-cycle version was created from Bruno Levy's multicycle code[^2], with signal names changed to match those in the book.
