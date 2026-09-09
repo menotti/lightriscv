@@ -2,6 +2,8 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/menotti/lightriscv)
 
+https://www.youtube.com/playlist?list=PLBZWofG0oRh8
+
 Single & Multi-cycle implementation of a subset of RISC-V for educational purposes. 
 
 The first version of this processor (multicycle) was adapted from the MIPS processor described in the Harris & Harris book[^1]. The single-cycle version was created from Bruno Levy's multicycle code[^2], with signal names changed to match those in the book.
@@ -41,3 +43,5 @@ Uncomment the following line if you want to simulate the multicycle version. In 
 
 [^1]: [Digital Design and Computer Architecture](https://shop.elsevier.com/books/digital-design-and-computer-architecture/harris/978-0-12-394424-5)
 [^2]: [From Blinker to RISC-V](https://github.com/BrunoLevy/learn-fpga/blob/master/FemtoRV/TUTORIALS/FROM_BLINKER_TO_RISCV/)
+
+[![YouTube Playlist with instructions (in portuguese)](https://img.youtube.com/vi/cuiVdmo3TxM/0.jpg)](https://www.youtube.com/playlist?list=PLBZWofG0oRh8)
