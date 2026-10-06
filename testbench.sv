@@ -7,9 +7,9 @@ module testbench();
     initial $display("### Compiling for Von Neumann architecture (combinational) ###");
     riscvmulti_combin cpu(clk, reset, addr, writedata, memwrite, readdata);
     mem #("von_neumann.hex") mem(clk, memwrite, addr, writedata, readdata);
-  `elsif MULTI
+  `elsif MULTISTRUCT
     initial $display("### Compiling for Von Neumann architecture ###");
-    riscvmulti cpu(clk, reset, addr, writedata, memwrite, readdata);
+    riscvmulti_struct cpu(clk, reset, addr, writedata, memwrite, readdata);
     mem #("von_neumann.hex") mem(clk, memwrite, addr, writedata, readdata);
   `else
   // Harvard architecture
@@ -29,7 +29,7 @@ module testbench();
         $writememh("registers.out", cpu.rf);
         $writememh("von_neumann.out", mem.RAM);
         #12000;
-      `elsif MULTI
+      `elsif MULTISTRUCT
         $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.dp.pc, cpu.dp.instrreg.q, cpu.c.md.state, cpu.dp.alu.a, cpu.dp.alu.b, cpu.dp.alu.result); // multicycle
         $writememh("registers.out", cpu.dp.rf.rf);
         $writememh("von_neumann.out", mem.RAM);
@@ -57,11 +57,11 @@ module testbench();
           #10 $display("Multi-cycle (combinational) simulation succeeded!");
           $writememh("registers.out", cpu.rf);
           $writememh("von_neumann.out", mem.RAM);
-      `elsif MULTI
+      `elsif MULTISTRUCT
         if (addr>>2 === 32'h0000006f && writedata === 32'h6d73e55f) begin
           #10 $display("Multi-cycle simulation succeeded!");
           $writememh("registers.out", cpu.dp.rf.rf);
-          $writememh("harvard_data.out", mem.RAM);
+          $writememh("von_neumann.out", mem.RAM);
       `else
         if (addr>>2 === 32'h0000002e && writedata === 32'h6d73e55f) begin
           #10 $display("Single-cycle simulation succeeded!");
