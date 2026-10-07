@@ -50,7 +50,7 @@
 //					OR  = 110
 //					XOR = 100
 
-module riscvmulti(
+module riscvmulti_struct(
             input  logic        clk, reset,
             output logic [31:0] adr, writedata,
             output logic        memwrite,

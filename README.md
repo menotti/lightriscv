@@ -18,7 +18,11 @@ _start:
 	#la s0, b # Von Neumann architecture (multicycle)
 ```
 
-Uncomment the following line if you want to simulate the multicycle version. In this version, the addresses are calculated correctly by the linker. To simulate this version, use the command `make VERSION=MULTI`.
+Uncomment the following line if you want to simulate the multicycle version. In this version, the addresses are calculated correctly by the linker. To simulate this version, use the command `make VERSION=MULTISTRUCT`.
+
+The multicycle processor comes in two equivalent descriptions, chosen by the same `VERSION` variable. `MULTISTRUCT` compiles `riscvmulti-struct.sv`, the structural one, in which the controller, the datapath and each building block (register file, ALU, multiplexers and flip-flops) are separate modules wired together as in the book. To simulate the combinational one instead, use the command `make VERSION=MULTICOMBIN`: `riscvmulti-combin.sv` describes the same processor as a single module, where the state machine, the control signals and the datapath are written as continuous assignments and only the architectural registers are clocked.
+
+Each simulation starts by printing the architecture it was compiled for, so you can check that the intended version was selected. An unrecognized `VERSION` falls back to the single-cycle version instead of failing.
 
 ## Implemented instructions
 * add
