@@ -6,10 +6,10 @@ module testbench();
   `ifdef MULTI
     `ifdef STRUCT
       initial $display("### Compiling for Von Neumann architecture (structural) ###");
-      riscvmulti_struct cpu(clk, reset, addr, writedata, memwrite, readdata);
+      riscv_multi_struct cpu(clk, reset, addr, writedata, memwrite, readdata);
     `else 
       initial $display("### Compiling for Von Neumann architecture (dataflow) ###");
-      riscvmulti_combin cpu(clk, reset, addr, writedata, memwrite, readdata);
+      riscv_multi_dataflow cpu(clk, reset, addr, writedata, memwrite, readdata);
     `endif
     mem #("von_neumann.hex") mem(clk, memwrite, addr, writedata, readdata);
   `else
@@ -19,7 +19,7 @@ module testbench();
       $finish; end
     `else
       initial $display("### Compiling for Harvard architecture (dataflow) ###");
-      riscvmono cpu(clk, reset, pc, instr, addr, writedata, memwrite, readdata);
+      riscv_single_dataflow cpu(clk, reset, pc, instr, addr, writedata, memwrite, readdata);
     `endif
     mem #("harvard_text.hex") instr_rom(.a(pc), .rd(instr));
     mem #("harvard_data.hex") data_ram(clk, memwrite, addr, writedata, readdata);
@@ -81,7 +81,7 @@ module testbench();
           if (1'b1) begin
         `else
           if (addr>>2 === 32'h0000002e && writedata === 32'h6d73e55f) begin
-            #10 $display("Single-cycle simulation succeeded!");
+            #10 $display("Single-cycle (dataflow) simulation succeeded!");
             $writememh("registers.out", cpu.RegisterFile);
             $writememh("harvard_data.out", data_ram.RAM);
         `endif

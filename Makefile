@@ -82,17 +82,14 @@ clean:
 
 .PHONY: single multi struct dataflow help clean
 
-single:
-	$(MAKE) VERSION=SINGLE STYLE=DATAFLOW
-
 multi:
-	$(MAKE) VERSION=MULTI STYLE=DATAFLOW
+	$(MAKE) VERSION=MULTI
 
 struct:
-	$(MAKE) VERSION=SINGLE STYLE=STRUCT
+	$(MAKE) VERSION=MULTI STYLE=STRUCT
 
 dataflow:
-	$(MAKE) VERSION=SINGLE STYLE=DATAFLOW
+	$(MAKE) STYLE=DATAFLOW
 
 help:
 	@echo "Makefile para simular o processador LightRISCV"

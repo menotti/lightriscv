@@ -1,4 +1,4 @@
-module riscvmono(
+module riscv_single_dataflow(
   input  logic Clk, Reset,
   // Instruction memory interface
   output logic [31:0] PC, 

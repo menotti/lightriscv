@@ -1,4 +1,4 @@
-module riscvmulti_combin(
+module riscv_multi_dataflow(
   input logic clk, reset,
   output logic [31:0] adr, writedata,
   output logic memwrite,
