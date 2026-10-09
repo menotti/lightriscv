@@ -1,8 +1,8 @@
 module riscv_multi_dataflow(
-  input logic clk, reset,
-  output logic [31:0] adr, writedata,
-  output logic memwrite,
-  input logic [31:0] readdata);
+  input logic Clk, Reset,
+  output logic [31:0] Adr, WriteData,
+  output logic MemWrite,
+  input logic [31:0] ReadData);
   
   // os 12 estados mapeados por H&H no seu processador multiciclo
   localparam [3:0] FETCH = 4'b0000, DECODE = 4'b0001, MEMADR = 4'b0010, MEMRD = 4'b0011, MEMWB = 4'b0100, MEMWR = 4'b0101, RTYPEEX = 4'b0110, RTYPEWB = 4'b0111, BEQEX = 4'b1000, ADDIEX = 4'b1001, ADDIWB = 4'b1010, JEX = 4'b1011;
@@ -24,7 +24,7 @@ module riscv_multi_dataflow(
   
   // as 'variaveis' (registradores)
   logic [31:0] pc, pca;   // PC, endereço atual da instrução (von Neumman)
-  logic [31:0] instr;     // o codigo da instrução
+  logic [31:0] Instr;     // o codigo da instrução
   logic [31:0] data;      // o dado a ser lido
   logic [31:0] a, b;      // rs1 e rs2 (facilitar a leitura)
   logic [31:0] aluout;    // o resultado da ULA
@@ -33,7 +33,7 @@ module riscv_multi_dataflow(
   // decodificação dos opcodes
   localparam [6:0] LW = 7'b0000011, SW = 7'b0100011, RTYPE = 7'b0110011, BEQ = 7'b1100011, ADDI = 7'b0010011, JAL = 7'b1101111;
 
-  wire [6:0] opcode = instr[6:0]; // os bits do opcode
+  wire [6:0] opcode = Instr[6:0]; // os bits do opcode
 
   wire isLW = (opcode == LW); // load word
   wire isSW = (opcode == SW); // save word
@@ -61,7 +61,7 @@ module riscv_multi_dataflow(
   
   // transposição da tabela de sinais de controle (linhas 174-188 do código estrutural)
   wire pcwrite = sFETCH | sJEX; // funções que "subscrevem" PC
-  assign memwrite = sMEMWR;     // escreve na memória
+  assign MemWrite = sMEMWR;     // escreve na memória
   wire irwrite = sFETCH;
   wire regwrite = sMEMWB | sRTYPEWB | sADDIWB;
   wire branch = sBEQEX;
@@ -73,7 +73,7 @@ module riscv_multi_dataflow(
   wire [1:0] aluop = sRTYPEEX ? 2'b10 : sBEQEX ? 2'b01 : 2'b00;
 
   // decoficando pra ULA
-  wire [2:0] funct3 = instr[14:12];
+  wire [2:0] funct3 = Instr[14:12];
 
   wire [2:0] alucontrol = (aluop  == 2'b00)  ? 3'b010 :   // add
                           (aluop  == 2'b01)  ? 3'b110 :   // sub
@@ -84,13 +84,13 @@ module riscv_multi_dataflow(
                                                3'bxxx;
 
   // campos da instrução
-  wire [4:0] rs1Id = instr[19:15];
-  wire [4:0] rs2Id = instr[24:20];
-  wire [4:0] rdId = instr[11:7];
+  wire [4:0] rs1Id = Instr[19:15];
+  wire [4:0] rs2Id = Instr[24:20];
+  wire [4:0] rdId = Instr[11:7];
 
   //imediatos (os únicos usados são o immI e immJ, por mais que o arquivo original tenha o U e o S)
-  wire [31:0] immI = {{20{instr[31]}}, instr[31:20]};
-  wire [31:0] immJ = {{11{instr[31]}}, instr[31], instr[19:12], instr[20], instr[30:21], 1'b0};
+  wire [31:0] immI = {{20{Instr[31]}}, Instr[31:20]};
+  wire [31:0] immJ = {{11{Instr[31]}}, Instr[31], Instr[19:12], Instr[20], Instr[30:21], 1'b0};
 
   // DATAPATH
   
@@ -99,7 +99,7 @@ module riscv_multi_dataflow(
   wire [31:0] rd2 = (rs2Id != 0) ? rf[rs2Id] : 32'b0;
 
   //muxes
-  assign adr = iord ? aluout : pc;  // pegar a memória com o pc (0) ou o endereço calculado pela ULA
+  assign Adr = iord ? aluout : pc;  // pegar a memória com o pc (0) ou o endereço calculado pela ULA
   wire [31:0] wd3 = memtoreg ? data : aluout; // o que é escrito no registrador? da memória ou da ULA
   wire [31:0] srca = (alusrca == 2'b10) ? pca : (alusrca == 2'b01) ? a : pc; // primeiro operando da ULA, calcular o pca, pegar o registrador 1 (a), ou calcular a posição do PC+4
   wire [31:0] srcb = (alusrcb == 3'b001) ? 32'd4 : // segundo operando: 4 para PC+4, imeditado I, escalonamento de branch, jump, ou usar o registrador 2 (b)
@@ -117,23 +117,23 @@ module riscv_multi_dataflow(
   wire pcen = pcwrite | (branch & zero); // 'write enable' do PC
   wire [31:0] pcnext = pcsrc[0] ? aluout : aluresult; // qual valor a ser pego? O do último ciclo (aluout) ou o atual (aluresult)?
 
-  assign writedata = b; // guarda rs2 na memória
+  assign WriteData = b; // guarda rs2 na memória
   
   // os 7 registrados e os estados
-  always @(posedge clk, posedge reset)
-    if (reset) begin // reseta todas as 'variáveis'
-      state <= FETCH; pc <= 0; pca <= 0; instr <= 0; data <= 0; a <= 0; b <= 0; aluout <= 0;
+  always @(posedge Clk, posedge Reset)
+    if (Reset) begin // Reseta todas as 'variáveis'
+      state <= FETCH; pc <= 0; pca <= 0; Instr <= 0; data <= 0; a <= 0; b <= 0; aluout <= 0;
     end else begin
       state <= nextstate;
       if (pcen) pc <= pcnext; // se for pra escrever, salva o próximo como pc
       if (pcen) pca <= pc;    // e salva o anterior como pca
-      if (irwrite) instr <= readdata; // coloca a palavra lida no registrador de instrução
-      data <= readdata; // captura qualquer memória lida para dados
+      if (irwrite) Instr <= ReadData; // coloca a palavra lida no registrador de instrução
+      data <= ReadData; // captura qualquer memória lida para dados
       a <= rd1;
       b <= rd2;
       aluout <= aluresult; // deixa o resultado salvo para os próximos ciclos (máquina de estados)
     end
 
-  always @(posedge clk)
+  always @(posedge Clk)
     if (regwrite) rf[rdId] <= wd3; // guardar wd3 no registrador rdId
 endmodule

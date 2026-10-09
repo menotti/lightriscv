@@ -36,7 +36,7 @@ module testbench();
           $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.dp.pc, cpu.dp.instrreg.q, cpu.c.md.state, cpu.dp.alu.a, cpu.dp.alu.b, cpu.dp.alu.result); // multicycle structural style
           $writememh("registers.out", cpu.dp.rf.rf);
         `else
-          $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.pc, cpu.instr, cpu.state, cpu.srca, cpu.srcb, cpu.aluresult); // multicycle dataflow style
+          $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.pc, cpu.Instr, cpu.state, cpu.srca, cpu.srcb, cpu.aluresult); // multicycle dataflow style
           $writememh("registers.out", cpu.rf);
         `endif
         $writememh("von_neumann.out", mem.RAM);

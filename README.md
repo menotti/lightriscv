@@ -26,6 +26,8 @@ make multi
 make struct
 ```
 
+> Warning: Always `make clean` when changing version/style!
+
 The default build is the single-cycle version.
 
 `MULTI` enables the multicycle assembly path and uses the multicycle datapath. `STRUCT` selects the structural Verilog description; `DATAFLOW` uses the dataflow version.
