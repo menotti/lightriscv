@@ -3,17 +3,18 @@ module testbench();
   logic [31:0] writedata, addr, readdata, pc, instr;
 
   // Von Neumann architecture
-  `ifdef MULTICOMBIN
-    initial $display("### Compiling for Von Neumann architecture (combinational) ###");
-    riscvmulti_combin cpu(clk, reset, addr, writedata, memwrite, readdata);
-    mem #("von_neumann.hex") mem(clk, memwrite, addr, writedata, readdata);
-  `elsif MULTISTRUCT
-    initial $display("### Compiling for Von Neumann architecture ###");
-    riscvmulti_struct cpu(clk, reset, addr, writedata, memwrite, readdata);
+  `ifdef MULTI
+    `ifdef STRUCT
+      initial $display("### Compiling for Von Neumann architecture (structural) ###");
+      riscvmulti_struct cpu(clk, reset, addr, writedata, memwrite, readdata);
+    `else 
+      initial $display("### Compiling for Von Neumann architecture (dataflow) ###");
+      riscvmulti_combin cpu(clk, reset, addr, writedata, memwrite, readdata);
+    `endif
     mem #("von_neumann.hex") mem(clk, memwrite, addr, writedata, readdata);
   `else
   // Harvard architecture
-    initial $display("### Compiling for Harvard architecture ###");
+    initial $display("### Compiling for Harvard architecture (dataflow) ###");
     riscvmono cpu(clk, reset, pc, instr, addr, writedata, memwrite, readdata);
     mem #("harvard_text.hex") instr_rom(.a(pc), .rd(instr));
     mem #("harvard_data.hex") data_ram(clk, memwrite, addr, writedata, readdata);
@@ -24,21 +25,23 @@ module testbench();
     begin
       $dumpfile("dump.vcd"); $dumpvars(0);
       reset <= 1; #20 reset <= 0;
-      `ifdef MULTICOMBIN
-        $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.pc, cpu.instr, cpu.state, cpu.srca, cpu.srcb, cpu.aluresult); // multicycle combinational
-        $writememh("registers.out", cpu.rf);
+      `ifdef MULTI
+        `ifdef STRUCT
+          $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.dp.pc, cpu.dp.instrreg.q, cpu.c.md.state, cpu.dp.alu.a, cpu.dp.alu.b, cpu.dp.alu.result); // multicycle structural style
+          $writememh("registers.out", cpu.dp.rf.rf);
+        `else
+          $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.pc, cpu.instr, cpu.state, cpu.srca, cpu.srcb, cpu.aluresult); // multicycle dataflow style
+          $writememh("registers.out", cpu.rf);
+        `endif
         $writememh("von_neumann.out", mem.RAM);
         #12000;
-      `elsif MULTISTRUCT
-        $monitor("time=%5t, pc=%h, instr=%h, state=%4b, SrcA=%h, SrcB=%h, ALUResult=%h", $time, cpu.dp.pc, cpu.dp.instrreg.q, cpu.c.md.state, cpu.dp.alu.a, cpu.dp.alu.b, cpu.dp.alu.result); // multicycle
-        $writememh("registers.out", cpu.dp.rf.rf);
-        $writememh("von_neumann.out", mem.RAM);
-        #12000;
+        $display("Multi-cycle simulation unsucceeded!");
       `else
         $monitor("time=%4t, pc=%h, instr=%h, SrcA=%h, SrcB=%h, ALUResult=%h", $time, pc, instr, cpu.SrcA, cpu.SrcB, cpu.ALUResult); // singlecycle
         $writememh("registers.out", cpu.RegisterFile);
         $writememh("harvard_data.out", data_ram.RAM);
         #3000;
+        $display("Single-cycle simulation unsucceeded!");
       `endif
       $finish;
     end
@@ -51,16 +54,16 @@ module testbench();
 
   // check results
   always @(negedge clk)
-    if (memwrite) begin
-      `ifdef MULTICOMBIN
+    if (memwrite)
+      `ifdef MULTI
         if (addr>>2 === 32'h0000006f && writedata === 32'h6d73e55f) begin
-          #10 $display("Multi-cycle (combinational) simulation succeeded!");
-          $writememh("registers.out", cpu.rf);
-          $writememh("von_neumann.out", mem.RAM);
-      `elsif MULTISTRUCT
-        if (addr>>2 === 32'h0000006f && writedata === 32'h6d73e55f) begin
-          #10 $display("Multi-cycle simulation succeeded!");
-          $writememh("registers.out", cpu.dp.rf.rf);
+          `ifdef STRUCT 
+            #10 $display("Multi-cycle (dataflow) simulation succeeded!");
+            $writememh("registers.out", cpu.dp.rf.rf);
+          `else
+            #10 $display("Multi-cycle (combinational) simulation succeeded!");
+            $writememh("registers.out", cpu.rf);
+          `endif 
           $writememh("von_neumann.out", mem.RAM);
       `else
         if (addr>>2 === 32'h0000002e && writedata === 32'h6d73e55f) begin
@@ -70,5 +73,4 @@ module testbench();
       `endif
         $finish;
       end
-    end
 endmodule

@@ -1,6 +1,9 @@
 # http://iverilog.icarus.com/
-CC=iverilog 
+CC=/bin/iverilog 
+VVP=/bin/vvp
+
 FLAGS=-Wall -g2012
+
 # http://gtkwave.sourceforge.net/
 VIEWER=code
 # http://gtkwave.sourceforge.net/
@@ -22,7 +25,7 @@ SRC    = fibo.asm
 OBJ    = $(SRC:.asm=.o)
 ELF    = fibo.elf
 LST    = fibo.lst
-HEX	= von_neumann.hex
+HEX    	 = von_neumann.hex
 HEX_TEXT = harvard_text.hex
 HEX_DATA = harvard_data.hex
 
@@ -59,10 +62,28 @@ $(LST): $(ELF)
 clean:
 	rm -f $(OBJ) $(ELF) $(HEX) $(HEX_TEXT) $(HEX_DATA) $(LST) *.out dump.vcd dump.log
 
+help:
+	@echo "Makefile para simular o processador LightRISCV"
+	@echo "\nVersão do processador: VERSION=$(VERSION)"
+	@echo "  SINGLE - Versão single-cycle (default)"
+	@echo "  MULTI - Versão multi-cycle"
+	@echo "\nEstilo de Verilog: STYLE=$(STYLE)"
+	@echo "  DATAFLOW - Versão dataflow (default)"
+	@echo "  STRUCT - Versão estrutural"
+	@echo "\nTargets disponíveis:"
+	@echo "  all               - Compila e gera todos os arquivos"
+	@echo "  clean             - Remove arquivos gerados"
+	@echo "  help              - Mostra esta mensagem de ajuda"
+	@echo "  simul             - Compila e simula os arquivos SystemVerilog (*.sv)"
+	@echo "  $(HEX)   - Gera arquivo HEX de memória unificada (von Neumann)"
+	@echo "  $(HEX_TEXT)  - Gera arquivo HEX de instruções (Harvard)"
+	@echo "  $(HEX_DATA)  - Gera arquivo HEX de dados (Harvard)"
+	@echo "  $(LST)          - Gera listagem com instruções + dados"
+
 simul: *.sv
-	$(CC) -D$(VERSION) $(FLAGS) *.sv 
-# 	vvp a.out | grep -v xxxx | sort > dump.log
-# 	vvp a.out > dump.log
-	vvp a.out 
+	$(CC) -D$(VERSION) -D$(STYLE) $(FLAGS) *.sv 
+# 	$(VVP) a.out | grep -v xxxx | sort > dump.log
+# 	$(VVP) a.out > dump.log
+	$(VVP) a.out 
 # 	$(VIEWER) dump.vcd
 # 	$(VIEWER) dump.vcd config.gtkw

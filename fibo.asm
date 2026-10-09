@@ -1,8 +1,11 @@
 .text	# 0x00000000
 .globl _start
 _start:
-	# addi s0, zero, 0x4 # Harvard architecture (monocycle)
+.ifdef MULTI 
 	la s0, b # Von Neumann architecture (multicycle)
+.else
+	addi s0, zero, 0x4 # Harvard architecture (monocycle)
+.endif 
 	lw t0, -4(s0)
 	lw t1, (s0)
 loop:
