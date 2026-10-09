@@ -13,11 +13,17 @@ module testbench();
     `endif
     mem #("von_neumann.hex") mem(clk, memwrite, addr, writedata, readdata);
   `else
-  // Harvard architecture
-    initial $display("### Compiling for Harvard architecture (dataflow) ###");
-    riscvmono cpu(clk, reset, pc, instr, addr, writedata, memwrite, readdata);
+    // Harvard architecture
+    `ifdef STRUCT
+      initial begin $display("### Harvard architecture (structural) not available! ###");
+      $finish; end
+    `else
+      initial $display("### Compiling for Harvard architecture (dataflow) ###");
+      riscvmono cpu(clk, reset, pc, instr, addr, writedata, memwrite, readdata);
+    `endif
     mem #("harvard_text.hex") instr_rom(.a(pc), .rd(instr));
     mem #("harvard_data.hex") data_ram(clk, memwrite, addr, writedata, readdata);
+
   `endif
 
   // initialize test
@@ -37,8 +43,13 @@ module testbench();
         #12000;
         $display("Multi-cycle simulation unsucceeded!");
       `else
-        $monitor("time=%4t, pc=%h, instr=%h, SrcA=%h, SrcB=%h, ALUResult=%h", $time, pc, instr, cpu.SrcA, cpu.SrcB, cpu.ALUResult); // singlecycle
-        $writememh("registers.out", cpu.RegisterFile);
+        `ifdef STRUCT
+          $display("### Harvard architecture (structural) not available! ###");
+          $finish;
+        `else
+          $monitor("time=%4t, pc=%h, instr=%h, SrcA=%h, SrcB=%h, ALUResult=%h", $time, pc, instr, cpu.SrcA, cpu.SrcB, cpu.ALUResult); // singlecycle
+          $writememh("registers.out", cpu.RegisterFile);
+        `endif
         $writememh("harvard_data.out", data_ram.RAM);
         #3000;
         $display("Single-cycle simulation unsucceeded!");
@@ -58,18 +69,22 @@ module testbench();
       `ifdef MULTI
         if (addr>>2 === 32'h0000006f && writedata === 32'h6d73e55f) begin
           `ifdef STRUCT 
-            #10 $display("Multi-cycle (dataflow) simulation succeeded!");
+            #10 $display("Multi-cycle (structural) simulation succeeded!");
             $writememh("registers.out", cpu.dp.rf.rf);
           `else
-            #10 $display("Multi-cycle (combinational) simulation succeeded!");
+            #10 $display("Multi-cycle (dataflow) simulation succeeded!");
             $writememh("registers.out", cpu.rf);
           `endif 
           $writememh("von_neumann.out", mem.RAM);
       `else
-        if (addr>>2 === 32'h0000002e && writedata === 32'h6d73e55f) begin
-          #10 $display("Single-cycle simulation succeeded!");
-          $writememh("registers.out", cpu.RegisterFile);
-          $writememh("harvard_data.out", data_ram.RAM);
+        `ifdef STRUCT
+          if (1'b1) begin
+        `else
+          if (addr>>2 === 32'h0000002e && writedata === 32'h6d73e55f) begin
+            #10 $display("Single-cycle simulation succeeded!");
+            $writememh("registers.out", cpu.RegisterFile);
+            $writememh("harvard_data.out", data_ram.RAM);
+        `endif
       `endif
         $finish;
       end

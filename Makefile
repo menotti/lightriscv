@@ -13,11 +13,29 @@ VIEWER=code
 # https://drom.io/vcd/?github=menotti/up1/master/processor/dump.vcd
 
 # Toolchain
+VERSION ?= SINGLE
+STYLE ?= DATAFLOW
+
+VALID_VERSIONS := SINGLE MULTI
+VALID_STYLES := DATAFLOW STRUCT
+
+ifneq ($(filter $(VERSION),$(VALID_VERSIONS)),$(VERSION))
+$(error Invalid VERSION value '$(VERSION)'. Valid values: $(VALID_VERSIONS))
+endif
+
+ifneq ($(filter $(STYLE),$(VALID_STYLES)),$(STYLE))
+$(error Invalid STYLE value '$(STYLE)'. Valid values: $(VALID_STYLES))
+endif
+
 CROSS   = riscv64-unknown-elf
 AS      = $(CROSS)-as
 LD      = $(CROSS)-ld
 OBJCOPY = $(CROSS)-objcopy
 OBJDUMP = $(CROSS)-objdump
+ASFLAGS = -march=rv32i
+ifeq ($(VERSION),MULTI)
+ASFLAGS += -defsym MULTI=1
+endif
 
 # Arquivos
 LDS    = riscv.ld
@@ -33,7 +51,7 @@ all: $(HEX) $(HEX_TEXT) $(HEX_DATA) $(LST) simul
 
 # Monta o assembly (RV32)
 $(OBJ): $(SRC)
-	$(AS) -march=rv32i -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $<
 
 # Linka em 32 bits usando o linker script
 $(ELF): $(OBJ) $(LDS)
@@ -62,6 +80,20 @@ $(LST): $(ELF)
 clean:
 	rm -f $(OBJ) $(ELF) $(HEX) $(HEX_TEXT) $(HEX_DATA) $(LST) *.out dump.vcd dump.log
 
+.PHONY: single multi struct dataflow help clean
+
+single:
+	$(MAKE) VERSION=SINGLE STYLE=DATAFLOW
+
+multi:
+	$(MAKE) VERSION=MULTI STYLE=DATAFLOW
+
+struct:
+	$(MAKE) VERSION=SINGLE STYLE=STRUCT
+
+dataflow:
+	$(MAKE) VERSION=SINGLE STYLE=DATAFLOW
+
 help:
 	@echo "Makefile para simular o processador LightRISCV"
 	@echo "\nVersão do processador: VERSION=$(VERSION)"
@@ -74,6 +106,10 @@ help:
 	@echo "  all               - Compila e gera todos os arquivos"
 	@echo "  clean             - Remove arquivos gerados"
 	@echo "  help              - Mostra esta mensagem de ajuda"
+	@echo "  single            - Alias para VERSION=SINGLE STYLE=DATAFLOW"
+	@echo "  multi             - Alias para VERSION=MULTI STYLE=DATAFLOW"
+	@echo "  struct            - Alias para VERSION=SINGLE STYLE=STRUCT"
+	@echo "  dataflow          - Alias para VERSION=SINGLE STYLE=DATAFLOW"
 	@echo "  simul             - Compila e simula os arquivos SystemVerilog (*.sv)"
 	@echo "  $(HEX)   - Gera arquivo HEX de memória unificada (von Neumann)"
 	@echo "  $(HEX_TEXT)  - Gera arquivo HEX de instruções (Harvard)"

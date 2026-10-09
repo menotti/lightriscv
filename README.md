@@ -10,19 +10,25 @@ The first version of this processor (multicycle) was adapted from the MIPS proce
 
 ## Instructions
 
-`make` will simulate the single-cycle version. Be careful with data addresses, as the linker won't calculate them correctly. In the example below, `s0` is manually set to the address of variable `b` instead of using the pseudo instruction `la`.
+Use the Makefile to select the processor variant and the Verilog style.
 
-```asm
-_start:
-	addi s0, zero, 0x4 # Harvard architecture (monocycle)
-	#la s0, b # Von Neumann architecture (multicycle)
+Valid values:
+- `VERSION`: `SINGLE` or `MULTI`
+- `STYLE`: `DATAFLOW` or `STRUCT`
+
+Examples:
+```bash
+make
+make VERSION=MULTI
+make STYLE=STRUCT
+make VERSION=MULTI STYLE=STRUCT
+make multi
+make struct
 ```
 
-Uncomment the following line if you want to simulate the multicycle version. In this version, the addresses are calculated correctly by the linker. To simulate this version, use the command `make VERSION=MULTISTRUCT`.
+The default build is the single-cycle version.
 
-The multicycle processor comes in two equivalent descriptions, chosen by the same `VERSION` variable. `MULTISTRUCT` compiles `riscvmulti-struct.sv`, the structural one, in which the controller, the datapath and each building block (register file, ALU, multiplexers and flip-flops) are separate modules wired together as in the book. To simulate the combinational one instead, use the command `make VERSION=MULTICOMBIN`: `riscvmulti-combin.sv` describes the same processor as a single module, where the state machine, the control signals and the datapath are written as continuous assignments and only the architectural registers are clocked.
-
-Each simulation starts by printing the architecture it was compiled for, so you can check that the intended version was selected. An unrecognized `VERSION` falls back to the single-cycle version instead of failing.
+`MULTI` enables the multicycle assembly path and uses the multicycle datapath. `STRUCT` selects the structural Verilog description; `DATAFLOW` uses the dataflow version.
 
 ## Implemented instructions
 * add
@@ -31,7 +37,7 @@ Each simulation starts by printing the architecture it was compiled for, so you 
 * sw
 * jal (incomplete)
 
-## EDA Playground
+## EDA Playground (old version)
 * [You can try it online here!](https://www.edaplayground.com/x/cTAA)
 
 
